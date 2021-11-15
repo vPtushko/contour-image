@@ -1,0 +1,85 @@
+from tkinter import *
+from PIL import Image
+from PIL import ImageTk
+import cv2
+from tkinter import filedialog, messagebox
+
+root = Tk()
+
+
+def contours():
+    global panelA, panelB
+
+    path = filedialog.askopenfilename()
+
+    if len(path) > 0:
+
+        image = cv2.imread(path)
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        edged = cv2.Canny(gray, 50, 100)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        cv2.imwrite("D:/img.jpg", edged)
+
+        image = Image.fromarray(image)
+        edged = Image.fromarray(edged)
+
+        image = ImageTk.PhotoImage(image)
+        edged = ImageTk.PhotoImage(edged)
+
+        if panelA is None or panelB is None:
+            panelA = Label(frame, image=image, height=600, width=700)
+            panelA.image = image
+            panelA.pack(side="left", padx=10, pady=10)
+
+            panelB = Label(frame, image=edged, height=600, width=700)
+            panelB.image = edged
+            panelB.pack(side="right", padx=10, pady=10)
+        else:
+            panelA.configure(image=image)
+
+            panelB.configure(image=edged)
+
+            panelA.image = image
+
+            panelB.image = edged
+
+
+def btn_click():
+    login = loginInput.get()
+    password = passField.get()
+
+    info_str = f' Your data : {str(login)}, {str(password)}'
+    messagebox.showinfo(title='Your data', message=info_str)
+
+    with open("Users.txt", "w") as file:
+        file.write(info_str)
+
+
+root['bg'] = 'ivory4'
+root.title('FindContours')
+
+mainmenu = Menu(root)
+root.config(menu=mainmenu)
+
+filemenu = Menu(mainmenu, tearoff=0)
+filemenu.add_command(label="Enter data", command=btn_click)
+filemenu.add_command(label="Select an image and save", command=contours)
+filemenu.add_command(label="Exit", command=root.destroy)
+mainmenu.add_cascade(label="Menu",
+                     menu=filemenu)
+
+frame = Frame(root, bg='ivory4')
+frame.place(relwidth=1, relheight=1)
+
+loginInput = Entry(frame, bg='ivory')
+loginInput.pack(padx=10, pady=10)
+
+passField = Entry(frame, bg='ivory', show='*')
+passField.pack(padx=10, pady=10)
+
+panelA = None
+panelB = None
+
+root.mainloop()
